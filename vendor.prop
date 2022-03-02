@@ -34,3 +34,6 @@ vendor.audio_hal.period_multiplier=3
 # Display
 ro.vendor.display.paneltype=2
 vendor.display.defer_fps_frame_count=2
+
+# USB
+vendor.usb.product_string=Xiaomi Pad 6
