@@ -47,6 +47,9 @@
 /dev/lirc[0-9]+                                                                                     u:object_r:lirc_device:s0
 /dev/spidev[0-9]+\.1                                                                                u:object_r:lirc_device:s0
 
+# Keyboard
+/vendor/bin/xiaomi-keyboard                                                                         u:object_r:xiaomi_keyboard_exec:s0
+
 # LED
 /sys/devices/platform/soc/[a-z0-9]+.qcom,spmi/spmi-[0-9]+/spmi[0-9]+-[0-9]+/[a-z0-9]+.qcom,spmi:qcom,[a-z0-9]+@[0-9]+:qcom,leds@[a-z0-9]+/leds(/.*)?    u:object_r:sysfs_leds:s0
 /sys/devices/platform/soc/[a-z0-9]+.i2c/i2c-[0-9]+/[0-9]+-[0-9]+/leds(/.*)?                         u:object_r:sysfs_leds:s0
@@ -84,6 +87,9 @@
 /data/vendor/mac_addr(/.*)?                                                                         u:object_r:vendor_wifi_vendor_data_file:s0
 /mnt/vendor/persist/wlan_mac\.bin                                                                   u:object_r:vendor_persist_wcnss_service_file:s0
 /vendor/bin/nv_mac                                                                                  u:object_r:vendor_wcnss_service_exec:s0
+
+# Xiaomi Keyboard
+/dev/nanodev0                                                                                       u:object_r:xiaomi_keyboard_device:s0
 
 # Xiaomi Touch
 /dev/xiaomi-touch                                                                                   u:object_r:xiaomi_touch_device:s0
