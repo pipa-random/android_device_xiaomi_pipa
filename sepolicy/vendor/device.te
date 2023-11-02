@@ -10,4 +10,6 @@ type sound_device, dev_type;
 
 type ultrasound_device, dev_type;
 
+type xiaomi_keyboard_device, dev_type;
+
 type xiaomi_touch_device, dev_type;
