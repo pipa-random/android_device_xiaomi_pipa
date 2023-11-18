@@ -231,6 +231,9 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.gatekeeper@1.0.vendor
 
+# GMS
+WITH_GMS_COMMS_SUITE := false
+
 # Health
 PRODUCT_PACKAGES += \
     android.hardware.health-service.qti
