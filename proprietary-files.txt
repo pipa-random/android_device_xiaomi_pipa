@@ -592,7 +592,7 @@ vendor/lib/libqcodec2_v4l2codec.so
 vendor/etc/dolby/dax-default.xml
 
 # Media (Dolby Music) - miui_SPARKGlobal_OS1.0.6.0.UHYMIXM
-vendor/bin/hw/vendor.dolby.hardware.dms@2.0-service|5a644ed81b426617a63503a2a07d9d8ab099bbfc
+vendor/bin/hw/vendor.dolby.hardware.dms@2.0-service|5a644ed81b426617a63503a2a07d9d8ab099bbfc|a7ec83e8823315db130720f101dc469dd5434d77
 vendor/etc/init/vendor.dolby.hardware.dms@2.0-service.rc|29296ebfe89b2697fec573be73cc3757fd97bed6
 vendor/etc/vintf/manifest/vendor.dolby.hardware.dms.xml|c8095f649de19b80271fb429b4b6b439297a0678
 vendor/lib/soundfx/libdlbvol.so|2098df6e8e7b872d3154a48cfb2fadbf145a8b72
