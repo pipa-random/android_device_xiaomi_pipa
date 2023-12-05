@@ -61,6 +61,8 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed('android.media.audio.common.types-V2-cpp.so', 'android.media.audio.common.types-V4-cpp.so'),
     'vendor/bin/hw/vendor.dolby.hardware.dms@2.0-service': blob_fixup()
         .add_needed('libstagefright_foundation-v33.so'),
+    'vendor/etc/dolby/dax-default.xml': blob_fixup()
+        .regex_replace('volume-leveler-enable value="true"', 'volume-leveler-enable value="false"'),
     'vendor/etc/init/init.batterysecret.rc': blob_fixup()
         .regex_replace(r'\s+seclabel u:r:batterysecret:s0', ''),
     'vendor/etc/init/init.mi_thermald.rc': blob_fixup()
