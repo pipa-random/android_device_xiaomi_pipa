@@ -13,4 +13,5 @@ ft3683g-y += focaltech_core.o \
 		focaltech_upgrade_ft3683g.o \
 		focaltech_test.o \
 		focaltech_test_ini.o \
-		focaltech_test_ft3683g.o
+		focaltech_test_ft3683g.o \
+		mi_disp_notifier.o
