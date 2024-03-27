@@ -16,5 +16,5 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Show battery cycle count -->
-    <bool name="config_showBatteryCycleCount" translatable="false">false</bool>
+    <bool name="config_show_battery_cycle_count" translatable="false">true</bool>
 </resources>
