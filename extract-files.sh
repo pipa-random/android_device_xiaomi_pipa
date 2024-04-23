@@ -58,9 +58,6 @@ function blob_fixup() {
         vendor/etc/init/init.mi_thermald.rc)
             sed -i "/seclabel u:r:mi_thermald:s0/d" "${2}"
             ;;
-        vendor/etc/media_codecs_kona.xml)
-            sed -i "/media_codecs_dolby_audio.xml/d" "${2}"
-            ;;
         vendor/etc/init/init.batterysecret.rc)
             sed -i "/seclabel u:r:batterysecret:s0/d" "${2}"
             ;;
