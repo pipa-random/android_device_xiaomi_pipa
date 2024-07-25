@@ -168,10 +168,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libpiex_shim
 
-# Camera
-PRODUCT_COPY_FILES += \
-    $(LOCAL_PATH)/camera/camera_cnf.txt:$(TARGET_COPY_OUT_VENDOR)/etc/camera/camera_cnf.txt
-
 # Configstore
 PRODUCT_PACKAGES += \
     disable_configstore
