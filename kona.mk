@@ -5,6 +5,7 @@
 #
 
 TARGET_IS_TABLET := true
+USE_TABLET_BT_COD := true
 
 # Setup dalvik vm configs
 $(call inherit-product, frameworks/native/build/phone-xhdpi-6144-dalvik-heap.mk)
