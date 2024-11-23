@@ -180,10 +180,6 @@ USE_TABLET_BT_COD := true
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/permissions/privapp-permissions-hotword.xml:$(TARGET_COPY_OUT_PRODUCT)/etc/permissions/privapp-permissions-hotword.xml
 
-# IFAAService
-PRODUCT_PACKAGES += \
-    IFAAService
-
 # IPACM
 PRODUCT_PACKAGES += \
     ipacm \
