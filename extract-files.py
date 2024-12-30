@@ -71,6 +71,10 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed('/vendor/lib/liba2dpoffload.so', 'liba2dpoffload_pipa.so\x00\x00\x00\x00\x00\x00\x00'),
     'vendor/lib64/vendor.qti.hardware.camera.postproc@1.0-service-impl.so': blob_fixup()
         .sig_replace('9A 0A 00 94', '1F 20 03 D5'),
+    ('vendor/lib64/libcodec2_soft_ac4dec.so', 'vendor/lib64/libcodec2_soft_ddpdec.so', 'vendor/lib64/libdlbdsservice.so'): blob_fixup()
+        .replace_needed('libstagefright_foundation.so', 'libstagefright_foundation-v33.so'),
+    ('vendor/bin/hw/vendor.dolby.hardware.dms@2.0-service', 'vendor/bin/hw/vendor.dolby.media.c2@1.0-service'): blob_fixup()
+        .add_needed('libstagefright_foundation-v33.so'),
 }  # fmt: skip
 
 module = ExtractUtilsModule(
