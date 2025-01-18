@@ -340,8 +340,5 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     libwfdaac_vendor
 
-PRODUCT_BOOT_JARS += \
-    WfdCommon
-
 # Inherit the proprietary files
 $(call inherit-product, vendor/xiaomi/pipa/pipa-vendor.mk)
