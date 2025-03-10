@@ -1,4 +1,4 @@
-# Unpinned blobs from pipa_global-user 14 UKQ1.230917.001 V816.0.15.0.UMZMIXM release-keys
+# Unpinned blobs from pipa_global-user 14 UKQ1.240624.001 OS2.0.2.0.UMZMIXM release-keys
 
 # ACDB
 vendor/etc/acdbdata/Forte/Forte_Bluetooth_cal.acdb
