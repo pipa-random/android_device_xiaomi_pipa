@@ -71,6 +71,12 @@ blob_fixups: blob_fixups_user_type = {
         .replace_needed('/vendor/lib/liba2dpoffload.so', 'liba2dpoffload_pipa.so\x00\x00\x00\x00\x00\x00\x00'),
     'vendor/lib64/vendor.qti.hardware.camera.postproc@1.0-service-impl.so': blob_fixup()
         .sig_replace('9A 0A 00 94', '1F 20 03 D5'),
+    ('vendor/lib64/libalAILDC.so', 'vendor/lib64/libalLDC.so', 'vendor/lib64/libalhLDC.so'): blob_fixup()
+        .clear_symbol_version('AHardwareBuffer_allocate')
+        .clear_symbol_version('AHardwareBuffer_describe')
+        .clear_symbol_version('AHardwareBuffer_lock')
+        .clear_symbol_version('AHardwareBuffer_release')
+        .clear_symbol_version('AHardwareBuffer_unlock'),
 }  # fmt: skip
 
 module = ExtractUtilsModule(
