@@ -185,6 +185,9 @@ struct fts_ts_platform_data {
 	u32 touch_def_array[4];
 	u32 touch_expert_array[4 * EXPERT_ARRAY_SIZE];
 	/* N17 code for HQ-299546 by liunianliang at 2023/6/13 end */
+
+	bool support_fod;
+	int fod_status;
 };
 
 struct ts_event {

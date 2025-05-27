@@ -239,6 +239,12 @@
 #define FTS_GESTURE_EN 0
 
 /*
+ * FOD support enable
+ * default: disable
+ */
+#define FTS_FOD_EN 1
+
+/*
  * ESD check & protection
  * default: disable
  */

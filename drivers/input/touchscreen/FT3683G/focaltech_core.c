@@ -608,6 +608,10 @@ static int fts_input_report_b(struct fts_ts_data *ts_data,
 			if (ts_data->log_level >= 1)
 				FTS_DEBUG("[B]P%d UP!", events[i].id);
 		}
+
+#if IS_ENABLED(FTS_FOD_EN)
+		update_fod_press_status(1);
+#endif
 	}
 
 	if (unlikely(touch_point_pre ^ touch_down_point_cur)) {
@@ -629,6 +633,9 @@ static int fts_input_report_b(struct fts_ts_data *ts_data,
 		if (ts_data->touch_points && (ts_data->log_level >= 1))
 			FTS_DEBUG("[B]Points All Up!");
 		input_report_key(input_dev, BTN_TOUCH, 0);
+#if IS_ENABLED(FTS_FOD_EN)
+		update_fod_press_status(0);
+#endif
 	}
 
 	ts_data->touch_points = touch_down_point_cur;
@@ -1986,6 +1993,11 @@ static int fts_parse_dt(struct device *dev, struct fts_ts_platform_data *pdata)
 	}
 	/* N17 code for HQ-299546 by liunianliang at 2023/6/13 end */
 
+	pdata->support_fod = of_property_read_bool(np, "focaltech,support-fod");
+	FTS_DEBUG("Read fod_support: %d", pdata->support_fod);
+	if (!pdata->support_fod)
+		FTS_INFO("FOD support is disabled from device tree");
+
 	FTS_FUNC_EXIT();
 	return 0;
 }
@@ -2179,6 +2191,9 @@ static void fts_init_xiaomi_touchfeature(struct fts_ts_data *ts_data)
 	xiaomi_touch_interfaces.panel_display_read = fts_panel_display_read;
 	xiaomi_touch_interfaces.touch_vendor_read = fts_touch_vendor_read;
 	/* N17 code for HQ-299728 by liunianliang at 2023/6/15 end */
+
+	ts_data->pdata->fod_status = -1;
+
 	xiaomitouch_register_modedata(0, &xiaomi_touch_interfaces);
 }
 /* N17 code for HQ-290835 by liunianliang at 2023/6/12 end */
