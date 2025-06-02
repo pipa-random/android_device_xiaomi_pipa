@@ -185,9 +185,6 @@ struct fts_ts_platform_data {
 	u32 touch_def_array[4];
 	u32 touch_expert_array[4 * EXPERT_ARRAY_SIZE];
 	/* N17 code for HQ-299546 by liunianliang at 2023/6/13 end */
-
-	bool support_fod;
-	int fod_status;
 };
 
 struct ts_event {
@@ -401,17 +398,6 @@ void fts_release_apk_debug_channel(struct fts_ts_data *);
 int fts_create_sysfs(struct fts_ts_data *ts_data);
 int fts_remove_sysfs(struct fts_ts_data *ts_data);
 
-/* N17 code for HQ-291087 by liunianliang at 2023/5/29 start */
-/* cust functions */
-int fts_create_procfs(struct fts_ts_data *ts_data);
-int fts_remove_procfs(struct fts_ts_data *ts_data);
-extern const struct proc_ops fts_tp_data_dump_ops;
-extern const struct proc_ops fts_ito_test_ops;
-extern bool ito_test_result;
-extern u8 ito_test_status;
-extern struct lct_tp_data_dump *lct_tp_data_dump_p;
-/* N17 code for HQ-291087 by liunianliang at 2023/5/29 end */
-
 /* ESD */
 int fts_esdcheck_init(struct fts_ts_data *ts_data);
 int fts_esdcheck_exit(struct fts_ts_data *ts_data);
@@ -420,10 +406,6 @@ void fts_esdcheck_proc_busy(struct fts_ts_data *ts_data, bool proc_debug);
 void fts_esdcheck_suspend(struct fts_ts_data *ts_data);
 void fts_esdcheck_resume(struct fts_ts_data *ts_data);
 bool fts_esd_is_disable(void);
-
-/* Host test */
-int fts_test_init(struct fts_ts_data *ts_data);
-int fts_test_exit(struct fts_ts_data *ts_data);
 
 /* Point Report Check*/
 int fts_point_report_check_init(struct fts_ts_data *ts_data);
@@ -460,7 +442,6 @@ int fts_reset_proc_extend(int hdelayms);
 /* N17 code for HQ-299560 by zhangzhijian5 at 2023/8/16 end */
 
 /* N17 code for HQ-306279 by liunianliang at 2023/07/07 start */
-extern int fts_init_lockdown_info(u8 *buf);
 extern int fts_ts_hw_info(struct fts_ts_data *ts_data);
 /* N17 code for HQ-306279 by liunianliang at 2023/07/07 end */
 

@@ -2140,13 +2140,6 @@ static void fts_fwupg_work(struct work_struct *work)
 	fts_irq_disable();
 	fts_esdcheck_switch(upg->ts_data, DISABLE);
 
-	/* N17 code for HQ-307165 by liunianliang at 2023/07/11 start */
-	ret = fts_init_lockdown_info(upg->ts_data->lockdown_info);
-	if (ret) {
-		FTS_ERROR("init lockdown info fail!");
-	}
-	/* N17 code for HQ-307165 by liunianliang at 2023/07/11 end */
-
 	/* get fw */
 	ret = fts_fwupg_get_fw_file(upg);
 	if (ret < 0) {

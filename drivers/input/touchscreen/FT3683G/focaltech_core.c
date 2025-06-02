@@ -39,7 +39,6 @@
 #if IS_ENABLED(CONFIG_DRM)
 #if IS_ENABLED(CONFIG_DRM_PANEL)
 #include <drm/drm_panel.h>
-#include "mi_disp_notifier.h"
 #else
 #include <linux/msm_drm_notify.h>
 #endif //CONFIG_DRM_PANEL
@@ -49,8 +48,6 @@
 #include <linux/fb.h>
 #endif //CONFIG_DRM
 #include "focaltech_core.h"
-
-#include "../xiaomi/xiaomi_touch.h"
 
 /*****************************************************************************
 * Private constant and macro definitions using #define
@@ -79,12 +76,6 @@ static int fts_ts_resume(struct device *dev);
 /* N17 code for HQ-322975 by xionglei6 at 2023/8/30 start */
 bool fts_gestures_status = false;
 /* N17 code for HQ-322975 by xionglei6 at 2023/8/30 end */
-
-static struct xiaomi_touch_interface xiaomi_touch_interfaces;
-
-/* N17 code for HQ-299546 by liunianliang at 2023/6/13 start */
-static void fts_game_mode_recovery(struct fts_ts_data *ts_data);
-/* N17 code for HQ-299546 by liunianliang at 2023/6/13 end */
 
 int fts_check_cid(struct fts_ts_data *ts_data, u8 id_h)
 {
@@ -156,20 +147,12 @@ void fts_tp_state_recovery(struct fts_ts_data *ts_data)
 	/* recover TP gesture state 0xD0 */
 	fts_gesture_recovery(ts_data);
 
-	/* N17 code for HQ-299546 by liunianliang at 2023/6/13 start */
-	fts_game_mode_recovery(ts_data);
-	/* N17 code for HQ-299546 by liunianliang at 2023/6/13 end */
 	FTS_FUNC_EXIT();
 }
 
 int fts_reset_proc(int hdelayms)
 {
 	FTS_DEBUG("tp reset");
-
-	/* N17 code for HQ-299560 by zhangzhijian5 at 2023/8/16 start */
-	fts_write_reg(FTS_REG_IDE_PARA_STATUS, FTS_REG_IDE_PARA_STATUS_EN);
-	msleep(20);
-	/* N17 code for HQ-299560 by zhangzhijian5 at 2023/8/16 end */
 
 	gpio_direction_output(fts_data->pdata->reset_gpio, 0);
 	msleep(1);
@@ -608,10 +591,6 @@ static int fts_input_report_b(struct fts_ts_data *ts_data,
 			if (ts_data->log_level >= 1)
 				FTS_DEBUG("[B]P%d UP!", events[i].id);
 		}
-
-#if IS_ENABLED(FTS_FOD_EN)
-		update_fod_press_status(1);
-#endif
 	}
 
 	if (unlikely(touch_point_pre ^ touch_down_point_cur)) {
@@ -633,9 +612,6 @@ static int fts_input_report_b(struct fts_ts_data *ts_data,
 		if (ts_data->touch_points && (ts_data->log_level >= 1))
 			FTS_DEBUG("[B]Points All Up!");
 		input_report_key(input_dev, BTN_TOUCH, 0);
-#if IS_ENABLED(FTS_FOD_EN)
-		update_fod_press_status(0);
-#endif
 	}
 
 	ts_data->touch_points = touch_down_point_cur;
@@ -1550,14 +1526,6 @@ static int fts_power_source_ctrl(struct fts_ts_data *ts_data, int enable)
 			msleep(1);
 			gpio_direction_output(ts_data->pdata->reset_gpio, 1);
 
-#if 0
-            if (!IS_ERR_OR_NULL(ts_data->vcc_i2c)) {
-                ret = regulator_enable(ts_data->vcc_i2c);
-                if (ret) {
-                    FTS_ERROR("enable vcc_i2c regulator failed,ret=%d", ret);
-                }
-            }
-#endif
 			ts_data->power_disabled = false;
 		}
 	} else {
@@ -1581,14 +1549,6 @@ static int fts_power_source_ctrl(struct fts_ts_data *ts_data, int enable)
 					  ret);
 			}
 
-#if 0
-            if (!IS_ERR_OR_NULL(ts_data->vcc_i2c)) {
-                ret = regulator_disable(ts_data->vcc_i2c);
-                if (ret) {
-                    FTS_ERROR("disable vcc_i2c regulator failed,ret=%d", ret);
-                }
-            }
-#endif
 			ts_data->power_disabled = true;
 		}
 	}
@@ -1638,20 +1598,6 @@ static int fts_power_source_init(struct fts_ts_data *ts_data)
 		ts_data->iovdd = NULL;
 	}
 
-#if 0
-    ts_data->vcc_i2c = devm_regulator_get(ts_data->dev, "vcc_i2c");
-    if (!IS_ERR_OR_NULL(ts_data->vcc_i2c)) {
-        if (regulator_count_voltages(ts_data->vcc_i2c) > 0) {
-            ret = regulator_set_voltage(ts_data->vcc_i2c,
-                                        FTS_I2C_VTG_MIN_UV,
-                                        FTS_I2C_VTG_MAX_UV);
-            if (ret) {
-                FTS_ERROR("vcc_i2c regulator set_vtg failed,ret=%d", ret);
-                regulator_put(ts_data->vcc_i2c);
-            }
-        }
-    }
-#endif
 
 #if FTS_PINCTRL_EN
 	fts_pinctrl_init(ts_data);
@@ -1675,27 +1621,6 @@ static int fts_power_source_exit(struct fts_ts_data *ts_data)
 #endif
 
 	fts_power_source_ctrl(ts_data, DISABLE);
-
-#if 0
-    if (!IS_ERR_OR_NULL(ts_data->vdd)) {
-        if (regulator_count_voltages(ts_data->vdd) > 0)
-            regulator_set_voltage(ts_data->vdd, 0, FTS_VTG_MAX_UV);
-        regulator_put(ts_data->vdd);
-    }
-
-    if (!IS_ERR_OR_NULL(ts_data->iovdd)) {
-        if (regulator_count_voltages(ts_data->iovdd) > 0)
-            regulator_set_voltage(ts_data->iovdd, 0, FTS_VTG_MAX_UV);
-        regulator_put(ts_data->iovdd);
-    }
-
-
-    if (!IS_ERR_OR_NULL(ts_data->vcc_i2c)) {
-        if (regulator_count_voltages(ts_data->vcc_i2c) > 0)
-            regulator_set_voltage(ts_data->vcc_i2c, 0, FTS_I2C_VTG_MAX_UV);
-        regulator_put(ts_data->vcc_i2c);
-    }
-#endif
 
 	return 0;
 }
@@ -1765,13 +1690,6 @@ static int fts_gpio_configure(struct fts_ts_data *data)
 			FTS_ERROR("[GPIO]reset gpio request failed");
 			goto err_irq_gpio_req;
 		}
-#if 0
-        ret = gpio_direction_output(data->pdata->reset_gpio, 1);
-        if (ret) {
-            FTS_ERROR("[GPIO]set_direction for reset gpio failed");
-            goto err_reset_gpio_dir;
-        }
-#endif
 	}
 
 	/* request iovdd gpio */
@@ -1785,11 +1703,6 @@ static int fts_gpio_configure(struct fts_ts_data *data)
 
 	FTS_FUNC_EXIT();
 	return 0;
-#if 0
-err_reset_gpio_dir:
-    if (gpio_is_valid(data->pdata->reset_gpio))
-        gpio_free(data->pdata->reset_gpio);
-#endif
 err_irq_gpio_dir:
 	if (gpio_is_valid(data->pdata->irq_gpio))
 		gpio_free(data->pdata->irq_gpio);
@@ -1993,16 +1906,11 @@ static int fts_parse_dt(struct device *dev, struct fts_ts_platform_data *pdata)
 	}
 	/* N17 code for HQ-299546 by liunianliang at 2023/6/13 end */
 
-	pdata->support_fod = of_property_read_bool(np, "focaltech,support-fod");
-	FTS_DEBUG("Read fod_support: %d", pdata->support_fod);
-	if (!pdata->support_fod)
-		FTS_INFO("FOD support is disabled from device tree");
-
 	FTS_FUNC_EXIT();
 	return 0;
 }
 
-static int fts_ts_suspend(struct device *dev)
+static int __maybe_unused fts_ts_suspend(struct device *dev)
 {
 	int ret = 0;
 	struct fts_ts_data *ts_data = fts_data;
@@ -2111,42 +2019,6 @@ static void fts_resume_work(struct work_struct *work)
 static int fb_notifier_callback(struct notifier_block *nb, unsigned long val,
 				void *data)
 {
-#if IS_ENABLED(CONFIG_DRM)
-	struct fts_ts_data *ts_data =
-		container_of(nb, struct fts_ts_data, fb_notif);
-	struct mi_disp_notifier *evdata = data;
-	unsigned int blank;
-
-	FTS_FUNC_ENTER();
-
-	if (!(val == MI_DISP_DPMS_EARLY_EVENT || val == MI_DISP_DPMS_EVENT)) {
-		FTS_ERROR("event(%lu) do not need process", val);
-		return 0;
-	}
-
-	if (evdata && evdata->data && ts_data) {
-		blank = *(int *)(evdata->data);
-		FTS_ERROR("val:%lu,blank:%u", val, blank);
-
-		if (val == MI_DISP_DPMS_EVENT &&
-		    (blank == MI_DISP_DPMS_POWERDOWN ||
-		     blank == MI_DISP_DPMS_LP1 || blank == MI_DISP_DPMS_LP2)) {
-			FTS_ERROR("FB_BLANK_POWERDOWN");
-
-			cancel_work_sync(&fts_data->resume_work);
-			fts_ts_suspend(ts_data->dev);
-		} else if (val == MI_DISP_DPMS_EVENT &&
-			   blank == MI_DISP_DPMS_ON) {
-			FTS_ERROR("FB_BLANK_UNBLANK");
-
-			flush_workqueue(fts_data->ts_workqueue);
-			queue_work(fts_data->ts_workqueue,
-				   &fts_data->resume_work);
-		}
-	}
-
-	FTS_FUNC_EXIT();
-#endif
 	return 0;
 }
 
@@ -2157,55 +2029,15 @@ static int fts_notifier_callback_init(struct fts_ts_data *ts_data)
 
 	ts_data->fb_notif.notifier_call = fb_notifier_callback;
 
-#if IS_ENABLED(CONFIG_DRM)
-	mi_disp_register_client(&ts_data->fb_notif);
-#endif
-
 	FTS_FUNC_EXIT();
 	return ret;
 }
 /* N17 code for HQ-301859 by liunianliang at 2023/06/30 end */
 
-/* This is strange, but it's ok */
-/* N17 code for HQ-299546 by liunianliang at 2023/6/13 start */
-#include "focaltech_mi_custom.c"
-/* N17 code for HQ-299546 by liunianliang at 2023/6/13 end */
-
-static void fts_init_xiaomi_touchfeature(struct fts_ts_data *ts_data)
-{
-	mutex_init(&ts_data->cmd_update_mutex);
-	memset(&xiaomi_touch_interfaces, 0x00,
-	       sizeof(struct xiaomi_touch_interface));
-
-	/* N17 code for HQ-299546 by liunianliang at 2023/6/13 start */
-	xiaomi_touch_interfaces.getModeValue = fts_get_mode_value;
-	xiaomi_touch_interfaces.setModeValue = fts_set_cur_value;
-	xiaomi_touch_interfaces.resetMode = fts_reset_mode;
-	xiaomi_touch_interfaces.getModeAll = fts_get_mode_all;
-	fts_init_touchmode_data(ts_data);
-	/* N17 code for HQ-299546 by liunianliang at 2023/6/13 end */
-
-	/* N17 code for HQ-299728 by liunianliang at 2023/6/15 start */
-	xiaomi_touch_interfaces.panel_vendor_read = fts_panel_vendor_read;
-	xiaomi_touch_interfaces.panel_color_read = fts_panel_color_read;
-	xiaomi_touch_interfaces.panel_display_read = fts_panel_display_read;
-	xiaomi_touch_interfaces.touch_vendor_read = fts_touch_vendor_read;
-	/* N17 code for HQ-299728 by liunianliang at 2023/6/15 end */
-
-	ts_data->pdata->fod_status = -1;
-
-	xiaomitouch_register_modedata(0, &xiaomi_touch_interfaces);
-}
-/* N17 code for HQ-290835 by liunianliang at 2023/6/12 end */
-
 /* N17 code for HQ-301859 by liunianliang at 2023/06/30 start */
 static int fts_notifier_callback_exit(struct fts_ts_data *ts_data)
 {
 	FTS_FUNC_ENTER();
-
-#if IS_ENABLED(CONFIG_MI_DISP_NOTIFIER)
-	mi_disp_unregister_client(&ts_data->fb_notif);
-#endif
 
 	FTS_FUNC_EXIT();
 	return 0;
@@ -2310,11 +2142,6 @@ int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 		FTS_ERROR("init gesture fail");
 	}
 
-	ret = fts_test_init(ts_data);
-	if (ret) {
-		FTS_ERROR("init host test fail");
-	}
-
 	ret = fts_esdcheck_init(ts_data);
 	if (ret) {
 		FTS_ERROR("init esd check fail");
@@ -2344,17 +2171,6 @@ int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 	if (ret) {
 		FTS_ERROR("init notifier callback fail");
 	}
-
-	/* N17 code for HQ-291087 by liunianliang at 2023/5/29 start */
-	ret = fts_create_procfs(ts_data);
-	if (ret) {
-		FTS_ERROR("create procfs node fail");
-	}
-	/* N17 code for HQ-291087 by liunianliang at 2023/5/29 end */
-
-	/* N17 code for HQ-290835 by liunianliang at 2023/6/12 start */
-	fts_init_xiaomi_touchfeature(ts_data);
-	/* N17 code for HQ-290835 by liunianliang at 2023/6/12 end */
 
 	FTS_FUNC_EXIT();
 	return 0;
@@ -2396,14 +2212,10 @@ int fts_ts_remove_entry(struct fts_ts_data *ts_data)
 	fts_point_report_check_exit(ts_data);
 	fts_release_apk_debug_channel(ts_data);
 	fts_remove_sysfs(ts_data);
-	/* N17 code for HQ-291087 by liunianliang at 2023/5/29 start */
-	fts_remove_procfs(ts_data);
-	/* N17 code for HQ-291087 by liunianliang at 2023/5/29 end */
+
 	fts_ex_mode_exit(ts_data);
 
 	fts_fwupg_exit(ts_data);
-
-	fts_test_exit(ts_data);
 
 	fts_esdcheck_exit(ts_data);
 
