@@ -176,128 +176,42 @@ static int fts_ft5672_flash_write_buf(u32 saddr, u8 *buf, u32 len, u32 delay)
 static void fts_communication_recovery_spi(void)
 {
 	u8 cmd_0[] = { 0x70, 0x55, 0xaa };
-	u8 cmd_1[] = { 0x70, 0x07, 0xf8, 0x81, 0xca, 0x00,
-		       0x00, 0x20, 0x00, 0x00, 0x00 };
-	u8 cmd_2[] = { 0x70, 0x07, 0xf8, 0x81, 0xc7, 0x00,
-		       0x00, 0x00, 0x00, 0x00, 0x00 };
-	u8 cmd_3[] = { 0x70, 0x07, 0xf8, 0x81, 0xc6, 0x00,
-		       0x00, 0x00, 0x80, 0x00, 0x00 };
-	u8 cmd_4[] = { 0x70, 0x07, 0xf8, 0x81, 0xc2, 0x00,
-		       0x00, 0x80, 0x00, 0x00, 0x00 };
-	u8 cmd_5[] = { 0x70, 0x07, 0xf8, 0x81, 0xc3, 0x00,
-		       0x00, 0x00, 0x00, 0x00, 0x00 };
-	u8 cmd_6[] = { 0x70, 0x07, 0xf8, 0x81, 0xc0, 0x00,
-		       0x00, 0x7f, 0x00, 0x00, 0x00 };
-	u8 cmd_7[] = { 0x70, 0x07, 0xf8, 0x81, 0xc1, 0x00,
-		       0x00, 0xc0, 0x00, 0x00, 0x00 };
-	u8 cmd_8[] = { 0x70, 0x07, 0xf8, 0x81, 0xc8, 0x00,
-		       0x00, 0xa5, 0x00, 0x00, 0x00 };
-	u8 cmd_9[] = { 0x70, 0x07, 0xf8, 0x81, 0xc8, 0x00,
-		       0x00, 0x0f, 0x00, 0x00, 0x00 };
-	u8 cmd_10[] = { 0x70, 0x07, 0xf8, 0x81, 0xc8, 0x00,
-			0x00, 0x6a, 0x00, 0x00, 0x00 };
-	u8 cmd_11[] = { 0x70, 0x07, 0xf8, 0x81, 0xc4, 0x00,
-			0x00, 0x10, 0x00, 0x00, 0x00 };
-	u8 cmd_12[] = { 0x70, 0x06, 0xf9, 0x81, 0xc4, 0x00, 0x00 };
-	u8 cmd = 0x71;
-	u8 val[5] = { 0 };
+	u8 cmd_1[] = { 0x70, 0x04, 0xfb, 0x80, 0x07, 0x00, 0x00 };
+	u8 cmd_2[] = { 0x71, 0x00, 0x00, 0x00, 0x00 };
+	u8 cmd_3[] = { 0x70, 0x07, 0xf8, 0x00, 0x07, 0x00,
+		       0x00, 0x5a, 0x5a, 0x00, 0x00 };
+	u8 cmd_4[] = { 0x70, 0x0a, 0xf5 };
+	u8 id[3] = { 0 };
 	int i = 0;
+	int retry_num = 3;
 
-	FTS_INFO("enter debug mode!!!!");
-	fts_bus_set_speed(fts_data, 1000000);
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < retry_num; i++) {
 		fts_reset_proc(fts_data, true, 0);
 		mdelay(2);
 
-		fts_bus_transfer_direct(cmd_0, sizeof(cmd_0), NULL, 0);
-		fts_bus_transfer_direct(cmd_1, sizeof(cmd_1), NULL, 0);
-		fts_bus_transfer_direct(cmd_2, sizeof(cmd_2), NULL, 0);
-		fts_bus_transfer_direct(cmd_3, sizeof(cmd_3), NULL, 0);
-		fts_bus_transfer_direct(cmd_4, sizeof(cmd_4), NULL, 0);
-		fts_bus_transfer_direct(cmd_5, sizeof(cmd_5), NULL, 0);
-		fts_bus_transfer_direct(cmd_6, sizeof(cmd_6), NULL, 0);
-		fts_bus_transfer_direct(cmd_7, sizeof(cmd_7), NULL, 0);
-		fts_bus_transfer_direct(cmd_8, sizeof(cmd_8), NULL, 0);
-		fts_bus_transfer_direct(cmd_9, sizeof(cmd_9), NULL, 0);
-		fts_bus_transfer_direct(cmd_10, sizeof(cmd_10), NULL, 0);
-		fts_bus_transfer_direct(cmd_11, sizeof(cmd_11), NULL, 0);
-		mdelay(8);
-		fts_bus_transfer_direct(cmd_12, sizeof(cmd_12), NULL, 0);
-		fts_bus_transfer_direct(&cmd, sizeof(cmd), val, sizeof(val));
+		fts_bus_transfer_direct(cmd_0, sizeof(cmd_0) / sizeof(cmd_0[0]),
+					NULL, 0);
+		msleep(1);
+		fts_bus_transfer_direct(cmd_1, sizeof(cmd_1) / sizeof(cmd_1[0]),
+					NULL, 0);
+		msleep(1);
+		fts_bus_transfer_direct(cmd_2, sizeof(cmd_2) / sizeof(cmd_2[0]),
+					NULL, 0);
+		msleep(1);
+		fts_bus_transfer_direct(cmd_3, sizeof(cmd_3) / sizeof(cmd_3[0]),
+					NULL, 0);
+		msleep(1);
+		fts_bus_transfer_direct(cmd_4, sizeof(cmd_4) / sizeof(cmd_4[0]),
+					NULL, 0);
 
-		if (val[1] == 0x50 && val[2] == 0x00 && val[3] == 0x00 &&
-		    val[4] == 0x00) {
-			FTS_INFO("debug mode success exit!!!");
+		msleep(20);
+		id[0] = 0x90;
+		fts_read(id, 1, &id[1], 2);
+		if (id[1] == 0x36 && id[2] == 0xB3) {
 			break;
 		}
-		FTS_INFO("debug mode exit read : 0x%x %x %x %x", val[1], val[2],
-			 val[3], val[4]);
-		mdelay(10);
+		msleep(10);
 	}
-	fts_reset_proc(fts_data, true, 100);
-	fts_bus_set_speed(fts_data, fts_data->spi_speed);
-}
-
-static void fts_communication_recovery_i2c(void)
-{
-	u8 cmd_0[] = { 0x55, 0xaa };
-	u8 cmd_1[] = { 0x07, 0xf8, 0x81, 0xca, 0x00,
-		       0x00, 0x20, 0x00, 0x00, 0x00 };
-	u8 cmd_2[] = { 0x07, 0xf8, 0x81, 0xc7, 0x00,
-		       0x00, 0x00, 0x00, 0x00, 0x00 };
-	u8 cmd_3[] = { 0x07, 0xf8, 0x81, 0xc6, 0x00,
-		       0x00, 0x00, 0x80, 0x00, 0x00 };
-	u8 cmd_4[] = { 0x07, 0xf8, 0x81, 0xc2, 0x00,
-		       0x00, 0x80, 0x00, 0x00, 0x00 };
-	u8 cmd_5[] = { 0x07, 0xf8, 0x81, 0xc3, 0x00,
-		       0x00, 0x00, 0x00, 0x00, 0x00 };
-	u8 cmd_6[] = { 0x07, 0xf8, 0x81, 0xc0, 0x00,
-		       0x00, 0x7f, 0x00, 0x00, 0x00 };
-	u8 cmd_7[] = { 0x07, 0xf8, 0x81, 0xc1, 0x00,
-		       0x00, 0xc0, 0x00, 0x00, 0x00 };
-	u8 cmd_8[] = { 0x07, 0xf8, 0x81, 0xc8, 0x00,
-		       0x00, 0xa5, 0x00, 0x00, 0x00 };
-	u8 cmd_9[] = { 0x07, 0xf8, 0x81, 0xc8, 0x00,
-		       0x00, 0x0f, 0x00, 0x00, 0x00 };
-	u8 cmd_10[] = { 0x07, 0xf8, 0x81, 0xc8, 0x00,
-			0x00, 0x6a, 0x00, 0x00, 0x00 };
-	u8 cmd_11[] = { 0x07, 0xf8, 0x81, 0xc4, 0x00,
-			0x00, 0x10, 0x00, 0x00, 0x00 };
-	u8 cmd_12[] = { 0x06, 0xf9, 0x81, 0xc4, 0x00, 0x00 };
-	u8 val[5] = { 0 };
-	int i = 0;
-
-	FTS_INFO("inter debug mode!!!!");
-	for (i = 0; i < 3; i++) {
-		fts_reset_proc(fts_data, true, 0);
-		mdelay(2);
-
-		fts_write(cmd_0, sizeof(cmd_0));
-		fts_write(cmd_1, sizeof(cmd_1));
-		fts_write(cmd_2, sizeof(cmd_2));
-		fts_write(cmd_3, sizeof(cmd_3));
-		fts_write(cmd_4, sizeof(cmd_4));
-		fts_write(cmd_5, sizeof(cmd_5));
-		fts_write(cmd_6, sizeof(cmd_6));
-		fts_write(cmd_7, sizeof(cmd_7));
-		fts_write(cmd_8, sizeof(cmd_8));
-		fts_write(cmd_9, sizeof(cmd_9));
-		fts_write(cmd_10, sizeof(cmd_10));
-		fts_write(cmd_11, sizeof(cmd_11));
-		mdelay(8);
-		fts_write(cmd_12, sizeof(cmd_12));
-		fts_read(NULL, 0, val, sizeof(val));
-
-		if (val[0] == 0x50 && val[1] == 0x00 && val[2] == 0x00 &&
-		    val[3] == 0x00) {
-			FTS_INFO("debug mode success exit!!!");
-			break;
-		}
-		FTS_INFO("debug mode exit read : 0x%x %x %x %x", val[1], val[2],
-			 val[3], val[4]);
-		mdelay(10);
-	}
-	fts_reset_proc(fts_data, true, 100);
 }
 
 /************************************************************************
@@ -386,16 +300,16 @@ static int fts_ft5672_upgrade(u8 *buf, u32 len)
 
 fw_reset:
 	FTS_INFO("upgrade fail, reset to normal boot");
-	if (fts_data->bus_type == BUS_TYPE_SPI) {
-		fts_communication_recovery_spi();
-	} else if (fts_data->bus_type == BUS_TYPE_I2C) {
-		fts_communication_recovery_i2c();
+	ret = fts_fwupg_reset_in_boot();
+	if (ret < 0) {
+		FTS_ERROR("reset to normal boot fail");
 	}
+	fts_communication_recovery_spi();
 	return -EIO;
 }
 
 struct upgrade_func upgrade_func_ft5672 = {
-	.ctype = { 0x90, 0x92 },
+	.ctype = { 0x8C, 0x8D, 0x8E, 0x90 },
 	.fwveroff = 0x010E,
 	.fwcfgoff = 0x1F80,
 	.appoff = 0x0000,
