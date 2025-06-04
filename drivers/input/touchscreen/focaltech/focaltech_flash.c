@@ -70,10 +70,6 @@ struct upgrade_func *upgrade_func_list_3683g[] = {
 	&upgrade_func_ft5672,
 };
 
-struct upgrade_func *upgrade_func_list_3681[] = {
-	&upgrade_func_ft5662,
-};
-
 struct fts_upgrade *fwupgrade;
 
 /*****************************************************************************
@@ -2243,17 +2239,14 @@ int fts_fwupg_init(struct fts_ts_data *ts_data)
 	int i = 0;
 	int j = 0;
 	u16 ic_stype = 0;
+
 	struct upgrade_func *func = NULL;
-	int func_count = sizeof(upgrade_func_list_3681) /
-			 sizeof(upgrade_func_list_3681[0]);
+	int func_count = sizeof(upgrade_func_list_3683g) /
+			 sizeof(upgrade_func_list_3683g[0]);
 
 	FTS_INFO("fw upgrade init function,ic_type = %d\n",
 		 ts_data->ic_type_flag);
-	if (ts_data->ic_type_flag) {
-		func = upgrade_func_list_3683g[0];
-	} else {
-		func = upgrade_func_list_3681[0];
-	}
+	func = upgrade_func_list_3683g[0];
 	if (!ts_data || !ts_data->ts_workqueue) {
 		FTS_ERROR(
 			"ts_data/workqueue is NULL, can't run upgrade function");
@@ -2277,11 +2270,7 @@ int fts_fwupg_init(struct fts_ts_data *ts_data)
 		fwupgrade->func = func;
 	} else {
 		for (i = 0; i < func_count; i++) {
-			if (ts_data->ic_type_flag) {
-				func = upgrade_func_list_3683g[i];
-			} else {
-				func = upgrade_func_list_3681[i];
-			}
+			func = upgrade_func_list_3683g[i];
 			for (j = 0; j < FTS_MAX_COMPATIBLE_TYPE; j++) {
 				if (0 == func->ctype[j])
 					break;

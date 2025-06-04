@@ -331,7 +331,6 @@ static int fts_get_chip_types(struct fts_ts_data *ts_data, u8 id_h, u8 id_l,
 {
 	u32 i = 0;
 	struct ft_chip_t ctype_3683g[] = FTS_CHIP_TYPE_MAPPING_3683g;
-	struct ft_chip_t ctype_3681[] = FTS_CHIP_TYPE_MAPPING_3681;
 	u32 ctype_entries = 0;
 
 	if ((0x0 == id_h) || (0x0 == id_l)) {
@@ -341,72 +340,36 @@ static int fts_get_chip_types(struct fts_ts_data *ts_data, u8 id_h, u8 id_l,
 
 	FTS_INFO("verify id:0x%02x%02x", id_h, id_l);
 
-	if (id_l == 0x72 || id_l == 0xb3) {
-		FTS_CHIP_TYPE = _FT3683G;
-		ts_data->ic_type_flag = true;
-		FTS_DEBUG("choose 3683g\n");
-		ctype_entries = sizeof(ctype_3683g) / sizeof(struct ft_chip_t);
-		for (i = 0; i < ctype_entries; i++) {
-			if (VALID == fw_valid) {
-				if (((id_h == ctype_3683g[i].chip_idh) &&
-				     (id_l == ctype_3683g[i].chip_idl)) ||
-				    (!fts_match_cid(ts_data,
-						    ctype_3683g[i].type, id_h,
-						    id_l, 0)))
-					break;
-			} else {
-				if (((id_h == ctype_3683g[i].rom_idh) &&
-				     (id_l == ctype_3683g[i].rom_idl)) ||
-				    ((id_h == ctype_3683g[i].pb_idh) &&
-				     (id_l == ctype_3683g[i].pb_idl)) ||
-				    ((id_h == ctype_3683g[i].bl_idh) &&
-				     (id_l == ctype_3683g[i].bl_idl))) {
-					break;
-				}
+	FTS_CHIP_TYPE = _FT3683G;
+	ts_data->ic_type_flag = true;
+	FTS_DEBUG("choose 3683g\n");
+	ctype_entries = sizeof(ctype_3683g) / sizeof(struct ft_chip_t);
+	for (i = 0; i < ctype_entries; i++) {
+		if (VALID == fw_valid) {
+			if (((id_h == ctype_3683g[i].chip_idh) &&
+					(id_l == ctype_3683g[i].chip_idl)) ||
+				(!fts_match_cid(ts_data,
+						ctype_3683g[i].type, id_h,
+						id_l, 0)))
+				break;
+		} else {
+			if (((id_h == ctype_3683g[i].rom_idh) &&
+					(id_l == ctype_3683g[i].rom_idl)) ||
+				((id_h == ctype_3683g[i].pb_idh) &&
+					(id_l == ctype_3683g[i].pb_idl)) ||
+				((id_h == ctype_3683g[i].bl_idh) &&
+					(id_l == ctype_3683g[i].bl_idl))) {
+				break;
 			}
 		}
-
-		if (i >= ctype_entries) {
-			return -ENODATA;
-		}
-
-		fts_match_cid(ts_data, ctype_3683g[i].type, id_h, id_l, 1);
-		ts_data->ic_info.ids = ctype_3683g[i];
-	} else if (id_l == 0x62) {
-		FTS_CHIP_TYPE = _FT3681;
-		ts_data->ic_type_flag = false;
-		FTS_DEBUG("choose 3681\n");
-
-		ctype_entries = sizeof(ctype_3681) / sizeof(struct ft_chip_t);
-		for (i = 0; i < ctype_entries; i++) {
-			if (VALID == fw_valid) {
-				if (((id_h == ctype_3681[i].chip_idh) &&
-				     (id_l == ctype_3681[i].chip_idl)) ||
-				    (!fts_match_cid(ts_data, ctype_3681[i].type,
-						    id_h, id_l, 0)))
-					break;
-			} else {
-				if (((id_h == ctype_3681[i].rom_idh) &&
-				     (id_l == ctype_3681[i].rom_idl)) ||
-				    ((id_h == ctype_3681[i].pb_idh) &&
-				     (id_l == ctype_3681[i].pb_idl)) ||
-				    ((id_h == ctype_3681[i].bl_idh) &&
-				     (id_l == ctype_3681[i].bl_idl))) {
-					break;
-				}
-			}
-		}
-
-		if (i >= ctype_entries) {
-			return -ENODATA;
-		}
-
-		fts_match_cid(ts_data, ctype_3681[i].type, id_h, id_l, 1);
-		ts_data->ic_info.ids = ctype_3681[i];
-	} else {
-		FTS_DEBUG("get chip wrong\n");
-		return -EINVAL;
 	}
+
+	if (i >= ctype_entries) {
+		return -ENODATA;
+	}
+
+	fts_match_cid(ts_data, ctype_3683g[i].type, id_h, id_l, 1);
+	ts_data->ic_info.ids = ctype_3683g[i];
 
 	return 0;
 }

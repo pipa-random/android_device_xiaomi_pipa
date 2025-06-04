@@ -12,5 +12,4 @@ focaltech-y := \
 	focaltech_spi_v2.o \
 	focaltech_debug.o \
 	focaltech_flash.o \
-	focaltech_flash/focaltech_upgrade_ft3681.o \
 	focaltech_flash/focaltech_upgrade_ft3683g.o
