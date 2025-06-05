@@ -2357,33 +2357,54 @@ static struct drm_panel *active_panel;
 
 static int drm_check_dt(struct fts_ts_data *ts_data)
 {
-	int i = 0;
-	int count = 0;
-	struct device_node *node = NULL;
-	struct drm_panel *panel = NULL;
-	struct device_node *np = NULL;
+	struct device_node *np = ts_data->dev->of_node;
+	struct device_node *node;
+	struct drm_panel *panel;
+	int count, i;
 
-	if (ts_data && ts_data->dev && ts_data->dev->of_node) {
-		np = ts_data->dev->of_node;
-		count = of_count_phandle_with_args(np, "panel", NULL);
-		if (count <= 0) {
-			FTS_ERROR("find drm_panel count(%d) fail", count);
-			return -ENODEV;
+	if (!np) {
+		FTS_ERROR("Device node is NULL");
+		return -ENODEV;
+	}
+
+	count = of_count_phandle_with_args(np, "panel", NULL);
+	FTS_DEBUG("of_count_phandle_with_args returned %d", count);
+
+	if (count <= 0) {
+		FTS_ERROR("No panel phandle found in device tree");
+		return -ENODEV;
+	}
+
+	for (i = 0; i < count; i++) {
+		node = of_parse_phandle(np, "panel", i);
+		if (!node) {
+			FTS_ERROR("of_parse_phandle returned NULL for index %d",
+				  i);
+			continue;
+		} else {
+			FTS_DEBUG(
+				"of_parse_phandle returned node %p for index %d",
+				node, i);
 		}
 
-		for (i = 0; i < count; i++) {
-			node = of_parse_phandle(np, "panel", i);
-			panel = of_drm_find_panel(node);
-			of_node_put(node);
-			if (!IS_ERR(panel)) {
-				FTS_INFO("find drm_panel successfully");
-				active_panel = panel;
-				return 0;
-			}
+		panel = of_drm_find_panel(node);
+		FTS_DEBUG("of_drm_find_panel returned %p for node %p", panel,
+			  node);
+		of_node_put(node);
+
+		if (IS_ERR(panel)) {
+			FTS_ERROR(
+				"of_drm_find_panel failed for index %d, error %ld",
+				i, PTR_ERR(panel));
+			continue;
+		} else {
+			FTS_INFO("Found drm_panel at index %d", i);
+			active_panel = panel;
+			return 0;
 		}
 	}
 
-	FTS_ERROR("no find drm_panel");
+	FTS_ERROR("Failed to find a valid drm_panel");
 	return -ENODEV;
 }
 #endif //CONFIG_DRM_PANEL
@@ -2437,8 +2458,13 @@ fts_panel_notifier_callback(enum panel_event_notifier_tag tag,
 {
 	struct fts_ts_data *ts_data = client_data;
 
+	FTS_DEBUG(
+		"fts_panel_notifier_callback called: tag=%d, notification=%p, client_data=%p",
+		tag, notification, client_data);
+
 	if (!notification) {
 		FTS_ERROR("Invalid notification\n");
+		return;
 	}
 
 	FTS_DEBUG(
@@ -2482,43 +2508,37 @@ fts_panel_notifier_callback(enum panel_event_notifier_tag tag,
 
 static int fts_notifier_callback_init(struct fts_ts_data *ts_data)
 {
-	int ret = 0;
-	void *cookie;
-	FTS_FUNC_ENTER();
-#if IS_ENABLED(CONFIG_DRM)
-//    ts_data->fb_notif.notifier_call = fb_notifier_callback;
-#if IS_ENABLED(CONFIG_DRM_PANEL)
+	int ret;
+
+	FTS_DEBUG("Enter fts_notifier_callback_init");
+
 	ret = drm_check_dt(ts_data);
-	if (ret)
-		FTS_ERROR("parse drm-panel fail");
-	FTS_INFO("init notifier with drm_panel_notifier_register");
+	FTS_DEBUG("drm_check_dt returned %d", ret);
+
+	if (ret) {
+		FTS_ERROR("parse drm-panel fail, ret=%d", ret);
+	} else {
+		FTS_INFO("drm_check_dt succeeded");
+	}
+
+	FTS_DEBUG("active_panel pointer: %p", active_panel);
+
 	if (active_panel) {
-		cookie = panel_event_notifier_register(
+		void *cookie = panel_event_notifier_register(
 			PANEL_EVENT_NOTIFICATION_PRIMARY,
 			PANEL_EVENT_NOTIFIER_CLIENT_PRIMARY_TOUCH, active_panel,
 			fts_panel_notifier_callback, ts_data);
 		ts_data->notifier_cookie = cookie;
+		FTS_DEBUG("panel_event_notifier_register returned cookie: %p",
+			  cookie);
 		if (!cookie)
-			FTS_ERROR("[DRM]panel_notifier_register fail: %d",
+			FTS_ERROR("[DRM]panel_notifier_register fail: %p",
 				  cookie);
-	}
-#else
-	ts_data->notifier_cookie = cookie;
-	FTS_INFO("init notifier with drm_register_client:%d\n", active_panel);
-//    ret = msm_drm_register_client(&ts_data->fb_notif);
-//    if (ret) FTS_ERROR("[DRM]msm_drm_register_client fail: %d", ret);
-#endif //CONFIG_DRM_PANEL
-
-#elif 0
-	FTS_INFO("init notifier with fb_register_client");
-	ts_data->fb_notif.notifier_call = fb_notifier_callback;
-	ret = fb_register_client(&ts_data->fb_notif);
-	if (ret) {
-		FTS_ERROR("[FB]Unable to register fb_notifier: %d", ret);
+	} else {
+		FTS_ERROR("active_panel is NULL, cannot register notifier");
 	}
 
-#endif //CONFIG_DRM
-	FTS_FUNC_EXIT();
+	FTS_DEBUG("Exit fts_notifier_callback_init");
 	return ret;
 }
 
@@ -2781,8 +2801,11 @@ int fts_ts_probe_entry(struct fts_ts_data *ts_data)
 
 	ret = fts_notifier_callback_init(ts_data);
 	if (ret) {
-		FTS_ERROR("init notifier callback fail");
+		FTS_ERROR("init notifier callback fail, ret=%d", ret);
+	} else {
+		FTS_INFO("Notifier callback initialized successfully");
 	}
+
 	ret = fts_read_reg(FTS_REG_FW_VER, &fwver);
 	ts_data->fwver = fwver;
 	FTS_INFO("FW ver = %02x", fwver);
