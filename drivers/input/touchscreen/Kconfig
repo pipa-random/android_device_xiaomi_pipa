@@ -1347,6 +1347,8 @@ source "drivers/input/touchscreen/goodix_berlin_driver/Kconfig"
 
 source "drivers/input/touchscreen/FT3683G/Kconfig"
 
+source "drivers/input/touchscreen/focaltech/Kconfig"
+
 source "drivers/input/touchscreen/xiaomi/Kconfig"
 
 endif
