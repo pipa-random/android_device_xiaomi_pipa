@@ -179,8 +179,6 @@ struct fts_ts_platform_data {
 	u32 x_min;
 	u32 y_min;
 	u32 max_touch_number;
-	bool support_fod;
-	int fod_status;
 };
 
 struct ts_event {
@@ -306,8 +304,6 @@ struct fts_ts_data {
 #endif
 	struct notifier_block fb_notif;
 	void *notifier_cookie;
-	struct mutex cmd_update_mutex;
-
 };
 
 enum _FTS_BUS_TYPE {
