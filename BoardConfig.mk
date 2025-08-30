@@ -89,9 +89,6 @@ TARGET_KERNEL_CONFIG := \
     vendor/xiaomi/sm8250-common.config \
     vendor/xiaomi/pipa.config
 
-# Media
-TARGET_USES_ION := true
-
 # Partitions
 BOARD_FLASH_BLOCK_SIZE := 262144 # (BOARD_KERNEL_PAGESIZE * 64)
 BOARD_BOOTIMAGE_PARTITION_SIZE := 201326592
