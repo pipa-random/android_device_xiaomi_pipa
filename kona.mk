@@ -160,7 +160,7 @@ PRODUCT_PACKAGES += \
 
 # Dolby
 PRODUCT_PACKAGES += \
-    XiaomiDolby
+    DolbyAtmos
 
 # DRM
 PRODUCT_PACKAGES += \
