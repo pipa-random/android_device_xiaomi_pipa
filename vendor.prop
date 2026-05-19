@@ -287,6 +287,9 @@ sys.vendor.shutdown.waittime=500
 # Subsystem Restart
 persist.vendor.ssr.restart_level=ALL_ENABLE
 
+# Thermal
+persist.vendor.tracking.dfs=true
+
 # USB
 sys.usb.mtp.batchcancel=1
 vendor.usb.diag.func.name=diag
